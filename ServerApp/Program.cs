@@ -9,10 +9,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
-});
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("TestClientError", policy =>
+    options.AddPolicy("AllowUnreachableClient", policy =>
     {
         policy.WithOrigins("http://localhost:9999") 
               .AllowAnyHeader()

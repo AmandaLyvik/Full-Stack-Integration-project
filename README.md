@@ -46,3 +46,4 @@ best practices for readability and maintainability
 - Update API endpoint
 - Update server CORS
 - Update client ProductService to handle invalid JSON responses
+- Add logger to log CORS and json errors to browser console
