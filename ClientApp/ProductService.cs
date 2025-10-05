@@ -2,6 +2,46 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Shared.Models;
+using System.ComponentModel.DataAnnotations;
+
+public static class ValidationHelper
+{
+    public static bool IsValid(object obj, out List<ValidationResult> results)
+    {
+        results = new List<ValidationResult>();
+        var context = new ValidationContext(obj);
+        bool isValid = Validator.TryValidateObject(obj, context, results, true);
+
+        foreach (var property in obj.GetType().GetProperties())
+        {
+            var value = property.GetValue(obj);
+            if (value == null || property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
+                continue;
+
+            if (value is IEnumerable<object> collection)
+            {
+                foreach (var item in collection)
+                {
+                    if (!IsValid(item, out var nestedResults))
+                    {
+                        isValid = false;
+                        results.AddRange(nestedResults);
+                    }
+                }
+            }
+            else
+            {
+                if (!IsValid(value, out var nestedResults))
+                {
+                    isValid = false;
+                    results.AddRange(nestedResults);
+                }
+            }
+        }
+
+        return isValid;
+    }
+}
 
 public class ProductService
 {
@@ -36,9 +76,14 @@ public class ProductService
             {
                 var products = JsonSerializer.Deserialize<Product[]>(json, options);
 
-                if (products == null || products.Length == 0)
+                if (!ValidationHelper.IsValid(products, out var validationErrors))
                 {
-                    return (null, "No products found or invalid data structure.");
+                    foreach (var error in validationErrors)
+                    {
+                        await _logger.ErrorAsync($"Validation error: {error.ErrorMessage}");
+                    }
+
+                    return (null, "Product data failed validation.");
                 }
 
                 return (products, null);

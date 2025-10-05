@@ -47,3 +47,8 @@ best practices for readability and maintainability
 - Update server CORS
 - Update client ProductService to handle invalid JSON responses
 - Add logger to log CORS and json errors to browser console
+
+# Activity 3
+
+- Update the API's return value and the shared Product model
+- Add data annotation and recursive validation 
