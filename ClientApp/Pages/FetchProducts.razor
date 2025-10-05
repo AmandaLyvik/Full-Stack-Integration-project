@@ -1,5 +1,6 @@
 @page "/fetchproducts"
 @inject HttpClient Http
+@using Shared.Models
 
 <h3>Product List</h3>
 
@@ -21,14 +22,6 @@
     private Product[]? products;
     protected override async Task OnInitializedAsync()
     {
-        // API call logic will go here
-    }
-
-    public class Product
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public double Price { get; set; }
-        public int Stock { get; set; }
+        products = await Http.GetFromJsonAsync<Product[]>("/api/products");
     }
 }
