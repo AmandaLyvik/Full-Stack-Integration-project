@@ -61,3 +61,4 @@ best practices for readability and maintainability
 
 - Identify and reduce redundant API calls in the front-end.
 - Implement a session storage cache to minimize server load.
+- Refactor the ProductService component 

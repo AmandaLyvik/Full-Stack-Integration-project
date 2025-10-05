@@ -4,56 +4,28 @@ using System.Threading.Tasks;
 using Shared.Models;
 using System.ComponentModel.DataAnnotations;
 
-public static class ValidationHelper
-{
-    public static bool IsValid(object obj, out List<ValidationResult> results)
-    {
-        results = new List<ValidationResult>();
-        var context = new ValidationContext(obj);
-        bool isValid = Validator.TryValidateObject(obj, context, results, true);
-
-        foreach (var property in obj.GetType().GetProperties())
-        {
-            var value = property.GetValue(obj);
-            if (value == null || property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
-                continue;
-
-            if (value is IEnumerable<object> collection)
-            {
-                foreach (var item in collection)
-                {
-                    if (!IsValid(item, out var nestedResults))
-                    {
-                        isValid = false;
-                        results.AddRange(nestedResults);
-                    }
-                }
-            }
-            else
-            {
-                if (!IsValid(value, out var nestedResults))
-                {
-                    isValid = false;
-                    results.AddRange(nestedResults);
-                }
-            }
-        }
-
-        return isValid;
-    }
-}
 
 public class ProductService
 {
     private readonly HttpClient _http;
+    private readonly IValidator<Product[]> _validator;
+    private readonly IJsonParser<Product[]> _parser;
     private readonly ConsoleLogger _logger;
     private readonly ISessionCacheService _cache;
     private const string CacheKey = "cachedProducts";
     private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
 
-    public ProductService(HttpClient http, ConsoleLogger logger, ISessionCacheService cache)
+    public ProductService(
+        HttpClient http,
+        IValidator<Product[]> validator,
+        IJsonParser<Product[]> parser,
+        ConsoleLogger logger,
+        ISessionCacheService cache
+    )
     {
         _http = http;
+        _validator = validator;
+        _parser = parser;
         _logger = logger;
         _cache = cache;
     }
@@ -82,16 +54,11 @@ public class ProductService
 
             var json = await response.Content.ReadAsStringAsync();
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
             try
             {
-                var products = JsonSerializer.Deserialize<Product[]>(json, options);
+                var products = _parser.Parse(json);
 
-                if (!ValidationHelper.IsValid(products, out var validationErrors))
+                if (!_validator.IsValid(products, out var validationErrors))
                 {
                     foreach (var error in validationErrors)
                     {
