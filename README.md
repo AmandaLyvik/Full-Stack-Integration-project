@@ -39,3 +39,10 @@ builder.Services.AddCors(options =>
 best practices for readability and maintainability
 - use shared Product class
 - use ProductService for error handling
+
+
+# Activity 2
+
+- Update API endpoint
+- Update server CORS
+- Update client ProductService to handle invalid JSON responses

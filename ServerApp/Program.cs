@@ -5,7 +5,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClient", policy =>
     {
-        policy.WithOrigins("http://localhost:5235") // your client URL
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("TestClientError", policy =>
+    {
+        policy.WithOrigins("http://localhost:9999") 
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -16,7 +25,7 @@ var app = builder.Build();
 // Use CORS
 app.UseCors("AllowClient");
 
-app.MapGet("/api/products", () =>
+app.MapGet("/api/productlist", () =>
 {
     return new[]
     {
@@ -24,5 +33,11 @@ app.MapGet("/api/products", () =>
         new { Id = 2, Name = "Headphones", Price = 50.00, Stock = 100 }
     };
 });
+
+// Endpoint that returns invalid JSON for testing
+//app.MapGet("/api/productlist", () =>
+//{
+//    return Results.Text("This is not valid JSON", "application/json");
+//});
 
 app.Run();
