@@ -1,27 +1,41 @@
 @page "/fetchproducts"
 @inject HttpClient Http
+@inject ProductService ProductService
 @using Shared.Models
 
 <h3>Product List</h3>
 
-<ul>
-   @if (products != null)
-    {
-        foreach (var product in products)
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else if (products == null)
+{
+    <p>Loading products...</p>
+}
+else if (products.Length == 0)
+{
+    <p>No products available.</p>
+}
+else
+{
+    <ul>
+        @foreach (var product in products)
         {
             <li>@product.Name - $@product.Price</li>
         }
-    }
-    else
-    {
-        <li>Loading...</li>
-    }
-</ul>
+    </ul>
+}
+
 
 @code {
     private Product[]? products;
+    private string? errorMessage;
+
     protected override async Task OnInitializedAsync()
     {
-        products = await Http.GetFromJsonAsync<Product[]>("/api/products");
+        var result = await ProductService.GetProductsAsync();
+        products = result.products;
+        errorMessage = result.error;
     }
 }

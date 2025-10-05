@@ -35,3 +35,7 @@ builder.Services.AddCors(options =>
 });
 
 ```
+
+best practices for readability and maintainability
+- use shared Product class
+- use ProductService for error handling
