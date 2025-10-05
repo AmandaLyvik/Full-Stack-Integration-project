@@ -1,64 +1,28 @@
-# Activity 1
+# 🧩 Blazor Product Catalog
 
-## FetchProducts.razor API logic
+A full-stack Blazor WebAssembly + ASP.NET Core Web API application with a shared class library for models and contracts. This project demonstrates clean architecture, robust validation, client/server caching, and modular service design — built for maintainability, performance, and clarity.
 
-Client side 
+---
 
-```
-// FetchProducts.razor
+## 🚀 Features
 
-@inject HttpClient Http
+- **Shared Class Library**: Strongly typed models shared between client and server.
+- **Modular Client Services**: Includes `ProductService`, `JsonProductParser`, `RecursiveValidator`, and `SessionCacheService`.
+- **Recursive Validation**: Validates deeply nested models using `DataAnnotations`.
+- **Client-Side Caching**: Uses `Blazored.SessionStorage` to reduce redundant API calls.
+- **Server-Side Caching**: Uses `IMemoryCache` to avoid repeated database/API hits.
+- **Console Logging**: Logs validation and network errors to the browser console.
+- **CORS Configuration**: Enables secure cross-origin communication between client and server.
 
-protected override async Task OnInitializedAsync()
-{
-    products = await Http.GetFromJsonAsync<Product[]>("/api/products");
-}
+---
 
-// Program.cs
-BaseAddress = new Uri("http://localhost:5086")
+## 🛠️ Tech Stack
 
-```
+- **Frontend**: Blazor WebAssembly
+- **Backend**: ASP.NET Core Web API
+- **Shared Models**: .NET Class Library
+- **Caching**: Blazored.SessionStorage (client), IMemoryCache (server)
+- **Validation**: System.ComponentModel.DataAnnotations
+- **Serialization**: System.Text.Json
+- **Logging**: Custom ConsoleLogger
 
-Server Side
-
-```
-// Program.cs
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowClient", policy =>
-    {
-        policy.WithOrigins("http://localhost:5235") // your client URL
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-```
-
-best practices for readability and maintainability
-- use shared Product class
-- use a ProductService for centralising error handling
-- improve UI Feedback for Errors on the `fetchproducts` page
-
-
-# Activity 2
-
-- Update API endpoint
-- Update server CORS
-- Update client ProductService to handle invalid JSON responses
-    - use `JsonSerializerOptions` and `JsonSerializer` for more control
-    - catch `JsonException` for more precise diagnostics
-- Add logger to log CORS and json errors to browser console
-    - We separated the logging logic in its own component for maintainability 
-
-# Activity 3
-
-- Update the API's return value and the shared Product model
-- Add data annotation and recursive validation 
-
-# Activity 4
-
-- Identify and reduce redundant API calls in the front-end.
-- Implement a session storage cache to minimize server load.
-- Refactor the ProductService component 
