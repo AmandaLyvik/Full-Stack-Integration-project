@@ -47,15 +47,30 @@ public class ProductService
 {
     private readonly HttpClient _http;
     private readonly ConsoleLogger _logger;
+    private readonly ISessionCacheService _cache;
+    private const string CacheKey = "cachedProducts";
+    private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
 
-    public ProductService(HttpClient http, ConsoleLogger logger)
+    public ProductService(HttpClient http, ConsoleLogger logger, ISessionCacheService cache)
     {
         _http = http;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<(Product[]? products, string? error)> GetProductsAsync()
     {
+        // Check if the data is in cache and still valid
+        if (await _cache.IsValidAsync(CacheKey, _cacheDuration))
+        {
+            var cached = await _cache.GetAsync<Product[]>(CacheKey);
+            if (cached is { Length: > 0 })
+            {
+                return (cached, null);
+            }
+        }
+
+        // Not in cache or cache expired, fetch from server
         try
         {
             var response = await _http.GetAsync("/api/productlist");
@@ -86,6 +101,7 @@ public class ProductService
                     return (null, "Product data failed validation.");
                 }
 
+                await _cache.SetAsync(CacheKey, products);
                 return (products, null);
             }
             catch (JsonException ex)

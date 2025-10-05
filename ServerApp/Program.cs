@@ -24,6 +24,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
+    // Test unreachable client origin
     options.AddPolicy("AllowUnreachableClient", policy =>
     {
         policy.WithOrigins("http://localhost:9999") 
