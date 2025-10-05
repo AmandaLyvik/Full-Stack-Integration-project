@@ -1,3 +1,6 @@
+using Shared.Models;
+using System.Text.Json;
+
 public interface IJsonParser<T>
 {
     T? Parse(string json);
